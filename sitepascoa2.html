@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Loja Online</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 30px auto;
+            gap: 30px;
+            padding: 0 20px;
+        }
+        
+        .catalog {
+            flex: 2;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        
+        .cart-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    }
+        
+        .cart {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        h1, h2 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+        
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .product {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: white;
+        }
+        
+        .product:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .product img {
+            max-width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .price {
+            font-weight: bold;
+            color: var(--secondary);
+            font-size: 1.3em;
+            margin: 15px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-item-info {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-quantity {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        .cart-item-price {
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .cart-total {
+            font-weight: bold;
+            font-size: 1.4em;
+            margin-top: 25px;
+            text-align: right;
+            color: var(--primary);
+        }
+        
+        .empty-cart {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px 0;
+        }
+        
+        .cart-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .cart-container {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Super Loja Online</h1>
+    </header>
+    
+    <div class="container">
+        <div class="catalog">
+            <h2>Nossos Produtos</h2>
+            <div class="products">
+                <div class="product">
+                    <img src="https://i.ibb.co/JFHS8g7m/ovopacoca.jpg" alt="Produto 1">
+                    <h3>Ovo Paçoca</h3>
+                    <p>400 Gramas.</p>
+                    <div class="price">R$ 120,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(1)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/PZyGnk4C/bolabayern.jpg" alt="Produto 2">
+                    <h3>Bola Bayern</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 125,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(2)">Adicionar ao Carrinho</button>
+                </div>
+                <!-- Produtos adicionados -->
+                <div class="product">
+                    <img src="https://i.ibb.co/RTrvNRpR/bolanba.jpg" alt="Produto 3">
+                    <h3>Bola NBA</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 125,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(3)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/JwxfsPLG/bolanfl.jpg" alt="Produto 4">
+                    <h3>Bola NFL</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 125,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(4)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/qYgpX5H0/ovofelizpascoa.jpg" alt="Produto 5">
+                    <h3>Ovo Feliz Páscoa</h3>
+                    <p>80 Gramas.</p>
+                    <div class="price">R$ 25,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(5)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/XrJ462vp/ovofoneazul.jpg" alt="Produto 6">
+                    <h3>Ovo Fone Azul</h3>
+                    <p>200 Gramas.</p>
+                    <div class="price">R$ 170,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(6)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/1YWZHmV3/ovofonerosa.jpg" alt="Produto 7">
+                    <h3>Ovo Fone Rosa</h3>
+                    <p>200 Gramas.</p>
+                    <div class="price">R$ 170,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(7)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/S4Nh7xbj/ovochocomonstro.jpg" alt="Produto 8">
+                    <h3>Ovo Chocomonstros</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 40,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(8)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/SD2r45jy/ovobella.jpg" alt="Produto 9">
+                    <h3>Ovo Garrafa Bella's</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 150,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(9)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/gbGH2YsC/ovogarrafachocomonstro.jpg" alt="Produto 10">
+                    <h3>Ovo Garrafa Chocomonstro</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 150,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(10)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/qY9bhvYH/ovoalmofadagarfield.jpg" alt="Produto 11">
+                    <h3>Ovo Almofada Garfield</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 150,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(11)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/0zrwLvT/ovopistache400g.jpg" alt="Produto 12">
+                    <h3>Ovo Lanut Pistache </h3>
+                    <p>400 Gramas.</p>
+                    <div class="price">R$ 150,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(12)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/tT5HCKnL/ovopantufaursinhos.jpg" alt="Produto 13">
+                    <h3>Ovo Pantufa Ursinhos</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 170,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(13)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/1YjBw2y5/ovopantufagarfield.jpg" alt="Produto 14">
+                    <h3>Ovo Pantufa Garfield</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 170,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(14)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/VYq76WCM/ovolooneypernalonga.jpg" alt="Produto 15">
+                    <h3>Ovo Touca Looney Toones</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 120,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(15)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/fzv39Pxn/ovolooneytouca.jpg" alt="Produto 16">
+                    <h3>Ovo Touca Looney Toones 2</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 120,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(16)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/jkK7XqL9/ovoestojo.jpg" alt="Produto 17">
+                    <h3>Ovo Estojo</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 90,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(17)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/XrZ6Wf5p/ovochefenuts.jpg" alt="Produto 18">
+                    <h3>Ovo Chefe Nuts</h3>
+                    <p>600 Gramas.</p>
+                    <div class="price">R$ 175,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(18)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/4q4zSq3/ovochefepistache.jpg" alt="Produto 19">
+                    <h3>Ovo Chefe Pistache</h3>
+                    <p>600 Gramas.</p>
+                    <div class="price">R$ 200,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(19)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/NdWK9n8x/ovolacremetrufado.jpg" alt="Produto 20">
+                    <h3>Ovo Lacreme Trufado</h3>
+                    <p>400 Gramas.</p>
+                    <div class="price">R$ 120,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(20)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/rKQvHH6s/ovomezzo.jpg" alt="Produto 21">
+                    <h3>Ovo Mezzo</h3>
+                    <p>200 Gramas.</p>
+                    <div class="price">R$ 55,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(21)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/k2W50Gvr/ovolacremezerotrufado.jpg" alt="Produto 22">
+                    <h3>Ovo Lacreme Trufado Zero</h3>
+                    <p>400 Gramas.</p>
+                    <div class="price">R$ 130,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(22)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/Rkj2rrWb/ovomochilabella.jpg" alt="Produto 23">
+                    <h3>Ovo Mochila Bella's </h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 130,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(23)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/mrWvhPdF/ovosortido700.jpg" alt="Produto 24">
+                    <h3>Ovo Sortido 700</h3>
+                    <p>700 Gramas.</p>
+                    <div class="price">R$ 160,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(24)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/MyN094kG/ovomochiladino.jpg" alt="Produto 25">
+                    <h3>Ovo Mochila Dinossauro</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 130,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(25)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/b54jD4Sq/ovomochilasnoopy.jpg" alt="Produto 26">
+                    <h3>Ovo Mochila Snoopy</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 130,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(26)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/j9cfv303/ovomochilabob.jpg" alt="Produto 27">
+                    <h3>Ovo Mochila Bob</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 140,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(27)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/B2Bw5z3d/ovomiau.jpg" alt="Produto 28">
+                    <h3>Ovo Miau</h3>
+                    <p>200 Gramas.</p>
+                    <div class="price">R$ 55,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(28)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/yc6rpPM7/ovosortido280.jpg"" alt="Produto 29">
+                    <h3>Ovo ao Leite Sortido</h3>
+                    <p>280 Gramas.</p>
+                    <div class="price">R$ 70,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(29)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/V0nTWd0W/ovoclassicotrufa.jpg" alt="Produto 30">
+                    <h3>Ovo ao Leite Trufa</h3>
+                    <p>280 Gramas.</p>
+                    <div class="price">R$ 70,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(30)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/vxnm44d9/ovomilfolhasavela.jpg" alt="Produto 31">
+                    <h3>Ovo Dreams Mil Folhas Avelã</h3>
+                    <p>400 Gramas.</p>
+                    <div class="price">R$ 115,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(31)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/RWGpVHk/ovopeluciameninassuperpoderosas.jpg" alt="Produto 32">
+                    <h3>Ovo Pelucia Meninas SuperPoderosas</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 125,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(32)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/hFvCQQfX/ovocoelhocacaumagia.jpg" alt="Produto 33">
+                    <h3>Ovo Coelho Cacau Magia 40g</h3>
+                    <p>40 Gramas</p>
+                    <div class="price">R$ 18,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(33)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/8g2gmc0D/ovocoelhocacaumagia70.jpg" alt="Produto 34">
+                    <h3>Ovo Coelho Artesanal Cacau Magia 70g</h3>
+                    <p>70 Gramas.</p>
+                    <div class="price">R$ 32,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(34)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/8pftDSZ/ovobytescrocante.jpg" alt="Produto 35">
+                    <h3>Ovo Bytes Crocante</h3>
+                    <p>280 Gramas</p>
+                    <div class="price">R$ 75,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(35)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/tTr9QWvx/ovobendito70.jpg" alt="Produto 36">
+                    <h3>Ovo Bendito Cacau 70%</h3>
+                    <p>348 Gramas</p>
+                    <div class="price">R$ 90,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(36)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/kgphdrg4/ovolacremeleite.jpg" alt="Produto 37">
+                    <h3>Ovo Lacreme Leite</h3>
+                    <p>348 Gramas.</p>
+                    <div class="price">R$ 85,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(37)">Adicionar ao Carrinho</button>
+                </div> 
+                <div class="product">
+                    <img src="https://i.ibb.co/fYRsbCzw/ovolacremebranco.jpg" alt="Produto 38">
+                    <h3>Ovo Lacreme Branco</h3>
+                    <p>348 Gramas.</p>
+                    <div class="price">R$ 85,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(38)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/yBXQF9kt/ovolacrememezzo.jpg" alt="Produto 39">
+                    <h3>Ovo Lacreme Mezzo</h3>
+                    <p>200 Gramas</p>
+                    <div class="price">R$ 60,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(39)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/KtY6kJV/ovolanutavela.jpg" alt="Produto 40">
+                    <h3>Ovo Lanut Avelã</h3>
+                    <p>348 Gramas.</p>
+                    <div class="price">R$ 85,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(40)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/Q3QpxfjW/ovoursinhoscarinhosos.jpg" alt="Produto 41">
+                    <h3>Ovo Pelúcia Ursinhos Carinhosos</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 130,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(41)">Adicionar ao Carrinho</button>
+                </div>  
+                <div class="product">
+                    <img src="https://i.ibb.co/zTDzrNkG/ovochaveirobob.jpg" alt="Produto 42">
+                    <h3>Ovo Chaveiro Bob</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 75,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(42)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/qYZdGkcm/ovodinossaurodarla.jpg" alt="Produto 43">
+                    <h3>Ovo Dinossauros Darla</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 115,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(43)">Adicionar ao Carrinho</button>
+                </div> 
+                <div class="product">
+                    <img src="https://i.ibb.co/Z7FHfqd/ovodinossaurodylan.jpg" alt="Produto 44">
+                    <h3>Ovo Dinossauros Dylan</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 115,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(44)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/6KtBDFB/ovochaveirogarfield.jpg" alt="Produto 45">
+                    <h3>Ovo Chaveiro Garfield</h3>
+                    <p>170 Gramas.</p>
+                    <div class="price">R$ 75,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(45)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/LDbhjBCP/ovobiscoiteria.jpg" alt="Produto 46">
+                    <h3>Ovo Biscoiteria</h3>
+                    <p>270 Gramas.</p>
+                    <div class="price">R$ 105,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(46)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/gLtpWy3H/ovolacremezerolactose.jpg" alt="Produto 47">
+                    <h3>Ovo Lacreme Zero Lactose</h3>
+                    <p>180 Gramas.</p>
+                    <div class="price">R$ 85,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(47)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/4Rf574DS/ovolacremezeroa-ucar.jpg" alt="Produto 48">
+                    <h3>Ovo Lacreme Zero Açúcar</h3>
+                    <p>180 Gramas.</p>
+                    <div class="price">R$ 85,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(48)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/x8Bpy77Q/ovobrownie.jpg" alt="Produto 49">
+                    <h3>Ovo Dreams Brownie</h3>
+                    <p>400 Gramas.</p>
+                    <div class="price">R$ 115,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(49)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="product">
+                    <img src="https://i.ibb.co/dJm6qJb9/ovomilfolhas.jpg" alt="Produto 50">
+                    <h3>Ovo Dreams Mil Folhas</h3>
+                    <p>400 Gramas.</p>
+                    <div class="price">R$ 115,00</div>
+                    <button class="btn btn-primary" onclick="addToCart(50)">Adicionar ao Carrinho</button>
+                </div>
+                <div class="cart-container">
+                    <div class="cart-container">
+                        <div class="cart">
+                            <h2>Seu Carrinho</h2>
+                            <div id="cart-items">
+                                <div class="empty-cart">Seu carrinho está vazio</div>
+                            </div>
+                            <div class="cart-total">Total: R$ <span id="cart-total">0,00</span></div>
+                            
+                            <div class="cart-actions">
+                                <button class="btn btn-danger" onclick="removeOneUnit()">Remover 1 Und</button>
+                                <button class="btn btn-danger" onclick="removeLastItem()">Remover Último</button>
+                                <button class="btn btn-success" onclick="checkout()">Finalizar Compra</button>
+                            </div>
+                        </div>
+                    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let cart = [];
+        const products = {
+            1: { name: "Ovo Paçoca", price: 120.00, image: "https://i.ibb.co/JFHS8g7m/ovopacoca.jpg" },
+            2: { name: "Bola Bayern", price: 125.00, image: "https://i.ibb.co/PZyGnk4C/bolabayern.jpg" },
+            3: { name: "Bola NBA", price: 125.00, image: "https://i.ibb.co/RTrvNRpR/bolanba.jpg" },
+            4: { name: "Bola NFL", price: 125.00, image: "https://i.ibb.co/JwxfsPLG/bolanfl.jpg" },
+            5: { name: "Ovo Feliz Pascoa", price: 25.00, image: "https://i.ibb.co/qYgpX5H0/ovofelizpascoa.jpg" },
+            6: { name: "Ovo Fone Azul", price: 170.00, image: "https://i.ibb.co/XrJ462vp/ovofoneazul.jpg" },
+            7: { name: "Ovo Fone Rosa", price: 170.00, image: "https://i.ibb.co/1YWZHmV3/ovofonerosa.jpg" },
+            8: { name: "Ovo Chocomonstro", price: 40.00, image: "https://i.ibb.co/S4Nh7xbj/ovochocomonstro.jpg" },
+            9: { name: "Ovo Garrafa Bella's", price: 150.00, image: "https://i.ibb.co/SD2r45jy/ovobella.jpg" },
+            10: { name: "Ovo Garrafa Chocomonstro", price: 150.00, image: "https://i.ibb.co/gbGH2YsC/ovogarrafachocomonstro.jpg" },
+            11: { name: "Ovo Almofada Garfield", price: 150.00, image: "https://i.ibb.co/qY9bhvYH/ovoalmofadagarfield.jpg" },
+            12: { name: "Ovo Lanut Pistache", price: 150.00, image: "https://i.ibb.co/0zrwLvT/ovopistache400g.jpg" },
+            13: { name: "Ovo Pantufa Ursinhos", price: 170.00, image: "https://i.ibb.co/tT5HCKnL/ovopantufaursinhos.jpg" },
+            14: { name: "Ovo Pantufa Garfield", price: 170.00, image: "https://i.ibb.co/1YjBw2y5/ovopantufagarfield.jpg" },
+            15: { name: "Ovo Touca Looney Toones", price: 120.00, image: "https://i.ibb.co/VYq76WCM/ovolooneypernalonga.jpg" },
+            16: { name: "Ovo Touca Looney Toones 2", price: 120.00, image: "https://i.ibb.co/fzv39Pxn/ovolooneytouca.jpg" },
+            17: { name: "Ovo Estojo", price: 90.00, image: "https://i.ibb.co/jkK7XqL9/ovoestojo.jpg" },
+            18: { name: "Ovo Chefe Nuts", price: 175.00, image: "https://i.ibb.co/XrZ6Wf5p/ovochefenuts.jpg" },
+            19: { name: "Ovo Chefe Pistache", price: 200.00, image: "https://i.ibb.co/4q4zSq3/ovochefepistache.jpg" },
+            20: { name: "Ovo Lacreme Trufado", price: 120.00, image: "https://i.ibb.co/NdWK9n8x/ovolacremetrufado.jpg" },
+            21: { name: "Ovo Mezzo", price: 55.00, image: "https://i.ibb.co/rKQvHH6s/ovomezzo.jpg" },
+            22: { name: "Ovo Lacreme Trufado Zero", price: 130.00, image: "https://i.ibb.co/k2W50Gvr/ovolacremezerotrufado.jpg" },
+            23: { name: "Ovo Mochila Bella's", price: 130.00, image: "https://i.ibb.co/Rkj2rrWb/ovomochilabella.jpg" },
+            24: { name: "Ovo Sortido 700", price: 160.00, image: "https://i.ibb.co/mrWvhPdF/ovosortido700.jpg" },
+            25: { name: "Ovo Mochila Dinossauro", price: 130.00, image: "https://i.ibb.co/MyN094kG/ovomochiladino.jpg" },
+            26: { name: "Ovo Mochila Snoopy", price: 130.00, image: "https://i.ibb.co/b54jD4Sq/ovomochilasnoopy.jpg" },
+            27: { name: "Ovo Mochila Bob", price: 140.00, image: "https://i.ibb.co/j9cfv303/ovomochilabob.jpg" },
+            28: { name: "Ovo Miau", price: 55.00, image: "https://i.ibb.co/B2Bw5z3d/ovomiau.jpg" },
+            29: { name: "Ovo Sortido 280g", price: 70.00, image: "https://i.ibb.co/yc6rpPM7/ovosortido280.jpg" },
+            30: { name: "Ovo ao Leite Trufa", price: 70.00, image: "https://i.ibb.co/V0nTWd0W/ovoclassicotrufa.jpg" },
+            31: { name: "Ovo Dreams Mil Folhas Avelã", price: 115.00, image: "https://i.ibb.co/vxnm44d9/ovomilfolhasavela.jpg" },
+            32: { name: "Ovo Pelucia Meninas SuperPoderosas", price: 125.00, image: "https://i.ibb.co/RWGpVHk/ovopeluciameninassuperpoderosas.jpg" },
+            33: { name: "Ovo Coelho Cacau Magia 40g ", price: 18.00, image: "https://i.ibb.co/hFvCQQfX/ovocoelhocacaumagia.jpg" },
+            34: { name: "Ovo Coelho Artesanal Cacau Magia 70 g", price: 32.00, image: "https://i.ibb.co/8g2gmc0D/ovocoelhocacaumagia70.jpg" },
+            35: { name: "Ovo Bytes Crocante", price: 75.00, image: "https://i.ibb.co/8pftDSZ/ovobytescrocante.jpg" },
+            36: { name: "Ovo Bendito Cacau 70%", price: 90.00, image: "https://i.ibb.co/tTr9QWvx/ovobendito70.jpg" },
+            37: { name: "Ovo Lacreme ao Leite", price: 85.00, image: "https://i.ibb.co/kgphdrg4/ovolacremeleite.jpg" },
+            38: { name: "Ovo Lacreme Branco", price: 85.00, image: "https://i.ibb.co/fYRsbCzw/ovolacremebranco.jpg" },
+            39: { name: "Ovo Lacreme Mezzo", price: 60.00, image: "https://i.ibb.co/yBXQF9kt/ovolacrememezzo.jpg" },
+            40: { name: "Ovo Lanut Avelã", price: 85.00, image: "https://i.ibb.co/KtY6kJV/ovolanutavela.jpg" },
+            41: { name: "Ovo Pelúcia Ursinhos Carinhosos", price: 130.00, image: "https://i.ibb.co/Q3QpxfjW/ovoursinhoscarinhosos.jpg" },
+            42: { name: "Ovo Chaveiro Bob ", price: 75.00, image: "https://i.ibb.co/zTDzrNkG/ovochaveirobob.jpg" },
+            43: { name: "Ovo Dinossauros Darla", price: 115.00, image: "https://i.ibb.co/qYZdGkcm/ovodinossaurodarla.jpg" },
+            44: { name: "Ovo Dinossauros Dylan", price: 115.00, image: "https://i.ibb.co/Z7FHfqd/ovodinossaurodylan.jpg" },
+            45: { name: "Ovo Chaveiro Garfield", price: 75.00, image: "https://i.ibb.co/6KtBDFB/ovochaveirogarfield.jpg" },
+            46: { name: "Ovo Biscoiteria", price: 105.00, image: "https://i.ibb.co/LDbhjBCP/ovobiscoiteria.jpg" },
+            47: { name: "Ovo Lacreme Zero Lactose", price: 85.00, image: "https://i.ibb.co/gLtpWy3H/ovolacremezerolactose.jpg" },
+            48: { name: "Ovo Lacreme Zero Açúcar", price: 85.00, image: "https://i.ibb.co/4Rf574DS/ovolacremezeroa-ucar.jpg" },
+            49: { name: "Ovo Dreams Brownie", price: 115.00, image: "https://i.ibb.co/x8Bpy77Q/ovobrownie.jpg" },
+            50: { name: "Ovo Dreams Mil Folhas", price: 115.00, image: "https://i.ibb.co/dJm6qJb9/ovomilfolhas.jpg" },
+        };
+    
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = isSuccess ? '#27ae60' : '#e74c3c';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    
+        function addToCart(productId) {
+            if (!products[productId]) {
+                showNotification("Produto não encontrado!", false);
+                return;
+            }
+    
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+                showNotification(`${existingItem.name} adicionado novamente!`);
+            } else {
+                cart.push({
+                    id: productId,
+                    name: products[productId].name,
+                    price: products[productId].price,
+                    image: products[productId].image,
+                    quantity: 1
+                });
+                showNotification(`${products[productId].name} adicionado ao carrinho!`);
+            }
+            
+            updateCart();
+        }
+    
+        function updateCart() {
+            const cartItemsElement = document.getElementById('cart-items');
+            const cartTotalElement = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                cartItemsElement.innerHTML = '<div class="empty-cart">Seu carrinho está vazio</div>';
+                cartTotalElement.textContent = '0,00';
+                return;
+            }
+            
+            let total = 0;
+            let itemsHTML = '';
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                itemsHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-quantity">${item.quantity} x R$ ${item.price.toFixed(2).replace('.', ',')}</div>
+                        </div>
+                        <div class="cart-item-price">R$ ${itemTotal.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                `;
+            });
+            
+            cartItemsElement.innerHTML = itemsHTML;
+            cartTotalElement.textContent = total.toFixed(2).replace('.', ',');
+        }
+        function removeOneUnit() {
+    if (cart.length === 0) {
+        showNotification("O carrinho já está vazio!", false);
+        return;
+    }
+    
+    const lastItem = cart[cart.length - 1];
+    
+    if (lastItem.quantity > 1) {
+        lastItem.quantity -= 1;
+        showNotification(`1 unidade de ${lastItem.name} removida do carrinho.`);
+    } else {
+        cart.pop();
+        showNotification(`${lastItem.name} removido do carrinho.`);
+    }
+    
+    updateCart();
+}
+
+// Função original para remover todo o último item (se você ainda quiser manter)
+function removeLastItem() {
+    if (cart.length === 0) {
+        showNotification("O carrinho já está vazio!", false);
+        return;
+    }
+    
+    const removedItem = cart.pop();
+    showNotification(`${removedItem.name} removido do carrinho.`);
+    updateCart();
+}
+        function checkout() {
+            if (cart.length === 0) {
+                showNotification("Adicione itens ao carrinho antes de finalizar!", false);
+                return;
+            }
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            showNotification(`Compra finalizada! Total: R$ ${total.toFixed(2).replace('.', ',')}`);
+            
+            // Limpa o carrinho após a compra
+            cart = [];
+            updateCart();
+        }
+    </script>
+        
