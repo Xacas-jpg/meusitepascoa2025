@@ -580,20 +580,21 @@
                     <button class="btn btn-primary" onclick="addToCart(50)">Adicionar ao Carrinho</button>
                 </div>
                 <div class="cart-container">
-            <div class="cart">
-                <h2>Seu Carrinho</h2>
-                <div id="cart-items">
-                    <div class="empty-cart">Seu carrinho está vazio</div>
-                </div>
-                <div class="cart-total">Total: R$ <span id="cart-total">0,00</span></div>
-                
-                <div class="cart-actions">
-                    <button class="btn btn-danger" onclick="removeLastItem()">Remover Último</button>
-                    <button class="btn btn-success" onclick="checkout()">Finalizar Compra</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div class="cart-container">
+                        <div class="cart">
+                            <h2>Seu Carrinho</h2>
+                            <div id="cart-items">
+                                <div class="empty-cart">Seu carrinho está vazio</div>
+                            </div>
+                            <div class="cart-total">Total: R$ <span id="cart-total">0,00</span></div>
+                            
+                            <div class="cart-actions">
+                                <button class="btn btn-danger" onclick="removeOneUnit()">Remover 1 Und</button>
+                                <button class="btn btn-danger" onclick="removeLastItem()">Remover Último</button>
+                                <button class="btn btn-success" onclick="checkout()">Finalizar Compra</button>
+                            </div>
+                        </div>
+                    </div>
     
     <div class="notification" id="notification"></div>
 
@@ -719,18 +720,36 @@
             cartItemsElement.innerHTML = itemsHTML;
             cartTotalElement.textContent = total.toFixed(2).replace('.', ',');
         }
+        function removeOneUnit() {
+    if (cart.length === 0) {
+        showNotification("O carrinho já está vazio!", false);
+        return;
+    }
     
-        function removeLastItem() {
-            if (cart.length === 0) {
-                showNotification("O carrinho já está vazio!", false);
-                return;
-            }
-            
-            const removedItem = cart.pop();
-            showNotification(`${removedItem.name} removido do carrinho.`);
-            updateCart();
-        }
+    const lastItem = cart[cart.length - 1];
     
+    if (lastItem.quantity > 1) {
+        lastItem.quantity -= 1;
+        showNotification(`1 unidade de ${lastItem.name} removida do carrinho.`);
+    } else {
+        cart.pop();
+        showNotification(`${lastItem.name} removido do carrinho.`);
+    }
+    
+    updateCart();
+}
+
+// Função original para remover todo o último item (se você ainda quiser manter)
+function removeLastItem() {
+    if (cart.length === 0) {
+        showNotification("O carrinho já está vazio!", false);
+        return;
+    }
+    
+    const removedItem = cart.pop();
+    showNotification(`${removedItem.name} removido do carrinho.`);
+    updateCart();
+}
         function checkout() {
             if (cart.length === 0) {
                 showNotification("Adicione itens ao carrinho antes de finalizar!", false);
